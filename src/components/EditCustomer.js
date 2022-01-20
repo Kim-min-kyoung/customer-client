@@ -1,11 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableRow } from '@material-ui/core';
-import { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import useAsync from '../hooks/useAsync';
 
-function CreateCustomer(props) {
-    const navigate = useNavigate();
+function EditCustomer(props) {
+    const param = useParams();
+    console.log(param);
+    const { id } = param;
+    async function getCustomer() {
+        const response = await axios.get(
+            `http://localhost:8080/customer/${id}`
+        )
+        return response.data;
+    }
+    const state = useAsync(getCustomer);
+    const { loading, error, data: customer } = state;
+    console.log(customer);
+
+    // 수정
     // input값 state로 관리
     const [ formData, setFormData ] = useState({
         c_name: "",
@@ -36,18 +49,21 @@ function CreateCustomer(props) {
     }
     // post전송 axios
     function insertCustomer(){
-        axios.post("http://localhost:8080/addCustomer", formData)
+        axios.post("http://localhost:8080/updateCustomer", formData)
         .then(function(res){
             console.log(res);
-            navigate(-1);
         })
         .catch(function(err){
             console.log(err);
         })
     }
+
+    if(loading) return <div>로딩중.....</div>
+    if(error) return <div>페이지를 나타낼 수 없습니다.</div>
+    if(!customer) return null;
     return (
         <div>
-            <h2>신규 고객 등록하기</h2>
+            <h2>고객 상세 정보</h2>
             <form onSubmit={onSubmit}>
                 <Table className='createTable'>
                     <TableBody>
@@ -94,7 +110,7 @@ function CreateCustomer(props) {
                         </TableRow>
                         <TableRow>
                             <TableCell colSpan={2}>
-                                <button type="submit">등록</button>
+                                <button type="submit">수정</button>
                                 <button type="reset">취소</button>
                             </TableCell>
                         </TableRow>
@@ -105,4 +121,4 @@ function CreateCustomer(props) {
     );
 }
 
-export default CreateCustomer;
+export default EditCustomer;

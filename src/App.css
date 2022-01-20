@@ -66,4 +66,5 @@ button {
     outline: none;
     padding: 10px 24px;
     border-radius: 6px;
+    cursor: pointer;
 }
